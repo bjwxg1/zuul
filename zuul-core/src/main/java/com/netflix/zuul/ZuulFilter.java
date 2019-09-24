@@ -65,6 +65,7 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
      *
      * @return A String representing that type
      */
+    //返回Filter类型
     abstract public String filterType();
 
     /**
@@ -80,6 +81,7 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
      *
      * @return true by default
      */
+    //默认情况下Filter为static
     public boolean isStaticFilter() {
         return true;
     }
@@ -114,6 +116,7 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
             if (shouldFilter()) {
                 Tracer t = TracerFactory.instance().startMicroTracer("ZUUL::" + this.getClass().getSimpleName());
                 try {
+                    //执行run()方法
                     Object res = run();
                     zr = new ZuulFilterResult(res, ExecutionStatus.SUCCESS);
                 } catch (Throwable e) {

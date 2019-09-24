@@ -44,40 +44,61 @@ import static org.mockito.Mockito.*;
  *         Date: 12/23/11
  *         Time: 10:44 AM
  */
+
+/**
+ * 在Zuul升级为NIO之前，是通过Servlet作为服务入口的；在ZuulServlet内部通过ZuulRunner来运行不同类型的Filter，一个Http请求
+ * 需要进过pre、route和post三种类型的Filter
+ */
 public class ZuulServlet extends HttpServlet {
 
     private static final long serialVersionUID = -3374242278843351500L;
     private ZuulRunner zuulRunner;
 
-
+    /**
+     * 重写了Init方法，在ZuulServlet创建后，用于初始化ZuulServlet
+     * @param config
+     * @throws ServletException
+     */
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
         String bufferReqsStr = config.getInitParameter("buffer-requests");
         boolean bufferReqs = bufferReqsStr != null && bufferReqsStr.equals("true") ? true : false;
-
+        //创建ZuulRunner
         zuulRunner = new ZuulRunner(bufferReqs);
     }
 
+    /**
+     * 重写service（）方法，所有的Http请求都会经过此处进行处理
+     * @param servletRequest
+     * @param servletResponse
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     public void service(javax.servlet.ServletRequest servletRequest, javax.servlet.ServletResponse servletResponse) throws ServletException, IOException {
         try {
+            //将servletRequest和servletResponse绑定到RequestContext
             init((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse);
 
             // Marks this request as having passed through the "Zuul engine", as opposed to servlets
             // explicitly bound in web.xml, for which requests will not have the same data attached
             RequestContext context = RequestContext.getCurrentContext();
+            //标记请求经过了Zuul引擎
             context.setZuulEngineRan();
 
             try {
+                //执行preFilter
                 preRoute();
             } catch (ZuulException e) {
+                //如果出现异常则运行errorFilter和postFilter
                 error(e);
                 postRoute();
                 return;
             }
             try {
+                //运行routeFilter
                 route();
             } catch (ZuulException e) {
                 error(e);
@@ -85,6 +106,7 @@ public class ZuulServlet extends HttpServlet {
                 return;
             }
             try {
+                //执行postFilter
                 postRoute();
             } catch (ZuulException e) {
                 error(e);

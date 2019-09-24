@@ -30,6 +30,7 @@ public interface IZuulFilter {
      *
      * @return true if the run() method should be invoked. false will not invoke the run() method
      */
+    //如果改方法返回true，表明run()方法将会被调用
     boolean shouldFilter();
 
     /**
