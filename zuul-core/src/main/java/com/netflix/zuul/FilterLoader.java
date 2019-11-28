@@ -53,16 +53,20 @@ public class FilterLoader {
     final static FilterLoader INSTANCE = new FilterLoader();
 
     private static final Logger LOG = LoggerFactory.getLogger(FilterLoader.class);
-
+    //使用四个ConcurrentHashMap维护Filter
+    //维护xxGrovvyZuulFilter.groovy filter文件的最近修改时间; key为filter文件名（绝对路径）,value为文件最后修改时间
     private final ConcurrentHashMap<String, Long> filterClassLastModified = new ConcurrentHashMap<String, Long>();
+    //filter文件名到Filter sourceCode的Map
     private final ConcurrentHashMap<String, String> filterClassCode = new ConcurrentHashMap<String, String>();
+    //主要是用来检测xxGrovvyZuulFilter这样的filter name 是否已经被注册; key 为 filter 文件名, value 也为文件名
     private final ConcurrentHashMap<String, String> filterCheck = new ConcurrentHashMap<String, String>();
+    //filter类型到filter List的映射
     private final ConcurrentHashMap<String, List<ZuulFilter>> hashFiltersByType = new ConcurrentHashMap<String, List<ZuulFilter>>();
 
     private FilterRegistry filterRegistry = FilterRegistry.instance();
 
     static DynamicCodeCompiler COMPILER;
-    
+    //创建Filter的工厂
     static FilterFactory FILTER_FACTORY = new DefaultFilterFactory();
 
     /**
@@ -106,7 +110,7 @@ public class FilterLoader {
      * @throws InstantiationException
      */
     public ZuulFilter getFilter(String sCode, String sName) throws Exception {
-
+        //如果filterCheck不存在，则添加到filterCheck
         if (filterCheck.get(sName) == null) {
             filterCheck.putIfAbsent(sName, sName);
             if (!sCode.equals(filterClassCode.get(sName))) {
@@ -114,6 +118,7 @@ public class FilterLoader {
                 filterRegistry.remove(sName);
             }
         }
+        //判断filter是否已经注册，如果没有注册则加载Filter
         ZuulFilter filter = filterRegistry.get(sName);
         if (filter == null) {
             Class clazz = COMPILER.compile(sCode, sName);
@@ -128,6 +133,7 @@ public class FilterLoader {
     /**
      * @return the total number of Zuul filters
      */
+    //返回注册的Filter个数
     public int filterInstanceMapSize() {
         return filterRegistry.size();
     }
@@ -143,12 +149,15 @@ public class FilterLoader {
      * @throws InstantiationException
      * @throws IOException
      */
+    //从File中读取ZuulFilter源码，并创建Filter对象
     public boolean putFilter(File file) throws Exception {
         String sName = file.getAbsolutePath() + file.getName();
+        //判断Filter的最后修改时间是否相等，如果不是则移除该Filter，然后重新加载
         if (filterClassLastModified.get(sName) != null && (file.lastModified() != filterClassLastModified.get(sName))) {
             LOG.debug("reloading filter " + sName);
             filterRegistry.remove(sName);
         }
+        //重新编译源码文件，并生成Filter对象
         ZuulFilter filter = filterRegistry.get(sName);
         if (filter == null) {
             Class clazz = COMPILER.compile(file);
@@ -173,6 +182,7 @@ public class FilterLoader {
      * @param filterType
      * @return a List<ZuulFilter>
      */
+    //根据filterType返回ZuulFilter
     public List<ZuulFilter> getFiltersByType(String filterType) {
 
         List<ZuulFilter> list = hashFiltersByType.get(filterType);

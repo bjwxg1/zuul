@@ -150,10 +150,12 @@ public class FilterProcessor {
             Debug.addRoutingDebug("Invoking {" + sType + "} type filters");
         }
         boolean bResult = false;
+        //调用FilterLoader加载指定类型的Filter
         List<ZuulFilter> list = FilterLoader.getInstance().getFiltersByType(sType);
         if (list != null) {
             for (int i = 0; i < list.size(); i++) {
                 ZuulFilter zuulFilter = list.get(i);
+                //执行Filter中的方法
                 Object result = processZuulFilter(zuulFilter);
                 if (result != null && result instanceof Boolean) {
                     bResult |= ((Boolean) result);

@@ -47,6 +47,10 @@ import static org.mockito.Mockito.*;
  *         Date: 10/12/11
  *         Time: 2:54 PM
  */
+
+/**
+ * 处理逻辑和ZuulServlet类似
+ */
 public class ZuulServletFilter implements Filter {
 
     private ZuulRunner zuulRunner;

@@ -44,11 +44,13 @@ import static org.mockito.Mockito.*;
  *         Date: 12/7/11
  *         Time: 12:09 PM
  */
+//根据目录，监控修改的或者新增的Groovy Filter文件，是一个Groovy Filter Manger
 public class FilterFileManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(FilterFileManager.class);
-
+    //GrroovyFilter源文件的目录
     String[] aDirectories;
+    //检测的时间间隔
     int pollingIntervalSeconds;
     Thread poller;
     boolean bRunning = true;
@@ -73,12 +75,15 @@ public class FilterFileManager {
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
+    //初始化FilterFileManger
     public static void init(int pollingIntervalSeconds, String... directories) throws Exception, IllegalAccessException, InstantiationException {
         if (INSTANCE == null) INSTANCE = new FilterFileManager();
 
         INSTANCE.aDirectories = directories;
         INSTANCE.pollingIntervalSeconds = pollingIntervalSeconds;
+        //加载aDirectories下的所有GroovyFilter，并创建对应的ZuulFilter
         INSTANCE.manageFiles();
+        //启动检测线程，动态检测GroovyFilter文件
         INSTANCE.startPoller();
 
     }
@@ -143,6 +148,7 @@ public class FilterFileManager {
      *
      * @return
      */
+    //获取目录下所有GroovyFilter的源文件
     List<File> getFiles() {
         List<File> list = new ArrayList<File>();
         for (String sDirectory : aDirectories) {
@@ -172,6 +178,7 @@ public class FilterFileManager {
         }
     }
 
+    //加载aDirectories下的所有GroovyFilter源文件，并创建对应的Filter
     void manageFiles() throws Exception, IllegalAccessException, InstantiationException {
         List<File> aFiles = getFiles();
         processGroovyFiles(aFiles);

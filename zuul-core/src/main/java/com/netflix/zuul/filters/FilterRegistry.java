@@ -9,6 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author mhawthorne
  */
+
+/**
+ * Filter 注册器，保存所有的Filter
+ */
 public class FilterRegistry {
 
     private static final FilterRegistry INSTANCE = new FilterRegistry();

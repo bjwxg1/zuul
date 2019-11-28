@@ -110,14 +110,18 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
      *
      * @return the return from ZuulFilterResult
      */
+    //真正运行Filter的方法
     public ZuulFilterResult runFilter() {
         ZuulFilterResult zr = new ZuulFilterResult();
+        //判断Filter是否关闭
         if (!isFilterDisabled()) {
+            //判断Filter是否需要执行
             if (shouldFilter()) {
                 Tracer t = TracerFactory.instance().startMicroTracer("ZUUL::" + this.getClass().getSimpleName());
                 try {
-                    //执行run()方法
+                    //执行Filter的run()方法
                     Object res = run();
+                    //执行完毕，返回执行结果
                     zr = new ZuulFilterResult(res, ExecutionStatus.SUCCESS);
                 } catch (Throwable e) {
                     t.setName("ZUUL::" + this.getClass().getSimpleName() + " failed");

@@ -3,6 +3,7 @@ package com.netflix.zuul;
 /**
  * Default factory for creating instances of ZuulFilter. 
  */
+//默认ZuulFilter工厂
 public class DefaultFilterFactory implements FilterFactory {
 
     /**
